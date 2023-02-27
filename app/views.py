@@ -5,7 +5,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.utils import secure_filename
 from app.models import UserProfile
 from app.forms import LoginForm
-
+from werkzeug.security import check_password_hash
 
 ###
 # Routing for your application.
@@ -40,24 +40,15 @@ def upload():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     form = LoginForm()
-
-    # change this to actually validate the entire form submission
-    # and not just one field
-    if form.username.data:
-        # Get the username and password values from the form.
-
-        # Using your model, query database for a user based on the username
-        # and password submitted. Remember you need to compare the password hash.
-        # You will need to import the appropriate function to do so.
-        # Then store the result of that query to a `user` variable so it can be
-        # passed to the login_user() method below.
-
-        # Gets user id, load into session
-        login_user(user)
-
-        # Remember to flash a message to the user
-        return redirect(url_for("home"))  # The user should be redirected to the upload form instead
-    return render_template("login.html", form=form)
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = UserProfile.query.filter_by(username=form.username.data).first()
+        if user is None or not check_password_hash(user.password, form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        flash('You have successfully logged in')
+        return redirect(url_for('upload'))
+    return render_template('login.html', title='Sign In', form=form)
 
 # user_loader callback. This callback is used to reload the user object from
 # the user ID stored in the session
