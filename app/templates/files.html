@@ -3,11 +3,38 @@
 {% block main %}
   <h1 class="page-header">Uploaded Files</h1>
 
-  <ul>
+  <div class="image-grid">
     {% for filename in image_files %}
-      <li>
+      <div class="image-item">
         <img src="{{ url_for('get_image', filename=filename) }}" alt="{{ filename }}" />
-      </li>
+      </div>
     {% endfor %}
-  </ul>
+  </div>
+
+  <style>
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    .image-item {
+      width: 100%;
+      height: 0;
+      padding-bottom: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .image-item img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  </style>
 {% endblock %}
+
