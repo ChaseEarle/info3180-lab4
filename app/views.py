@@ -7,6 +7,8 @@ from app.models import UserProfile
 from app.forms import LoginForm
 from werkzeug.security import check_password_hash
 from .forms import UploadForm
+from flask import send_from_directory
+
 ###
 # Routing for your application.
 ###
@@ -23,7 +25,26 @@ def about():
     return render_template('about.html', name="Mary Jane")
 
 
-@app.route('/upload', methods=['POST', 'GET'])
+
+def get_uploaded_images():
+    upload_dir = os.path.join(os.getcwd(), 'uploads')
+    images = []
+    for filename in os.listdir(upload_dir):
+        if filename.endswith('.jpg') or filename.endswith('.png'):
+            images.append(filename)
+    return images
+
+@app.route('/uploads/<filename>')
+def get_image(filename):
+    return send_from_directory(os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER']), filename)
+
+@app.route('/files')
+def files():
+    image_files = get_uploaded_images()
+    return render_template('files.html', image_files=image_files)
+
+
+
 @app.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
